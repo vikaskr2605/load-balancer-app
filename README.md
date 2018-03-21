@@ -19,78 +19,127 @@ Apart from PUSH_LOAD_INFO, Slave LB nodes keep sending hello messages for livene
 The ###communication protocol### between Master LB node and Slave LB nodes Master and Slaves will use TCP protocol to communicate with each other which will ensure guaranteed delivery ion packets.
 
 ### Data Structures
+
 enum lb_node_type
+
 {
+
   LB_NODE_MASTER;
+  
   LB_NODE_CLIENT;
+  
   LB_NODE_MAX;
+  
 };
 
 struct lb
+
+
 {
   lb_node_type    node_type;	/* Master or Slave*/
+  
   union node {
+  
     lb_master master;	/* Data specific to lb Maser */
-	  lb_slave slave;    /* Data specific to lb Slave */
+    
+    lb_slave slave;    /* Data specific to lb Slave */
+	  
   }
+  
 lb_timer timer;		/* Timer used depending on Master or Slave */
+
 lb_socket_context sock_ctx;    /* node socket address */
+
 lb_load_info load_info;	/* node load info*/
+
 }
 
 ### Master LB
 
 enum lb_master_state
+
 {
+
   lb_MASTER_ST_UP_LISTENING;
-  lb_MASTER_ST_DOWN;`
+  
+  lb_MASTER_ST_DOWN;
+  
 }
 
 struct lb_master
+
 {
+
   lb_master_state state;
+  
   lb_slave *lb_slave_table[MAX_LB_SLAVES]; /* connected slaves */
+  
 }
 
 ### Slave LB
 
 enum lb_slave_state
+
 { 
+
   LB_SLAVE_CONNECTED;
-  LB_SLAVE_PUSH_LOAD_INFO;	/* client push */
-  LB_SLAVE_DOWN; /* 
+  
+  LB_SLAVE_PUSH_LOAD_INFO;	/* Slave push */
+  
+  LB_SLAVE_DOWN; 
+  
 }
 
 struct lb_slave
+
 {
+
   lb_slave_state state;
+  
   lb_msg *msg; /* node message receiving or writing depending on state */
+  
 }
 
 ### LB messages(LB header + LB payload)
 
 enum lb_msg_type
+
 { 
+
   MSG_PUSH_LOAD_INFO;
+  
   MSG_HELLO;
-  MSG_HELLO_AC;
+  
+  MSG_HELLO_ACK;
+  
 }lb_message;
 
 ### Header
 
 #define lb_MSG_HDR_SIZE 4 /*bytes*/
+
 typedef struct lb_msg_hdr_t
+
 {
+
   uint16 payload_type;   /* should match lb_MSG_XXXX */
+  
   uint16 payload_len;     /* payload len; excludes header lb_MSG_HDR_SIZE */
+  
 }lb_msg_hdr;
 
 ### Header + Payload
 
 typedef struct lb_msg_t
+
 {
+
   lb_msg_hdr header;
+  
   char payload[MAX_SIZE];
+  
   uint total_processed_len; 	 /* Read or Write */
+  
   boolean doneProcessing;      /* done processing*/
+  
 }lb_msg;
